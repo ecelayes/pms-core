@@ -32,6 +32,25 @@ db-down:
 db-force:
 	migrate -path $(MIGRATIONS_DIR) -database "$(DATABASE_URL)" force $(version)
 
+## db-seed: Load test data (Hotels, Rooms, Inventory)
+# Requires the ‘PSQL’ client to be in your PATH.
+db-seed:
+	@echo "Creating test data"
+	@psql "$(DATABASE_URL)" -f scripts/seed.sql
+
+# ==============================================================================
+# CODE GENERATION (SQLC)
+# ==============================================================================
+
+## sqlc-install: Install the SQLC tool locally.
+sqlc-install:
+	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+
+## sqlc: Generate Go code from SQL queries
+sqlc:
+	@echo "Generating database code"
+	sqlc generate
+
 # ==============================================================================
 # APLICATION COMMANDS
 # ==============================================================================
