@@ -59,7 +59,15 @@ Use the `Makefile` to create the tables automatically:
 make db-up
 ```
 
-### 4. Start the Server
+### 4. Seed Data (Optional)
+
+Populate the database with dummy data (Hotels, Rooms, Inventory) for testing:
+
+```bash
+make db-seed
+```
+
+### 5. Start the Server
 
 Start the application:
 
