@@ -6,9 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/pgtype"
-
 	"github.com/ecelayes/pms-core/internal/adapter/repository/postgres/db"
-
 	"github.com/ecelayes/pms-core/internal/core/domain"
 	"github.com/ecelayes/pms-core/internal/core/ports"
 )
