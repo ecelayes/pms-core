@@ -8,6 +8,16 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type BackupGuestsV2 struct {
+	ID             pgtype.UUID        `json:"id"`
+	HotelID        pgtype.UUID        `json:"hotel_id"`
+	Email          pgtype.Text        `json:"email"`
+	FullName       string             `json:"full_name"`
+	Phone          pgtype.Text        `json:"phone"`
+	PassportNumber pgtype.Text        `json:"passport_number"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+}
+
 type Booking struct {
 	ID           pgtype.UUID        `json:"id"`
 	HotelID      pgtype.UUID        `json:"hotel_id"`

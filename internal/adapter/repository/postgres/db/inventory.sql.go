@@ -23,7 +23,7 @@ SELECT
     version
 FROM inventory
 WHERE 
-    date >= $1 AND date <= $2
+    date >= $1 AND date < $2
 ORDER BY date ASC
 `
 
