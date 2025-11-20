@@ -61,8 +61,8 @@ func (s *BookingService) Cancel(ctx context.Context, id string) error {
 	}
 	
 	if b.Status == domain.BookingStatusCancelled {
-		return nil 
+		return nil
 	}
 
-	return s.repo.UpdateStatus(ctx, id, domain.BookingStatusCancelled)
+	return s.repo.CancelBookingAtomic(ctx, id)
 }
