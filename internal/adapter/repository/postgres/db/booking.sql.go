@@ -86,3 +86,146 @@ func (q *Queries) CreateBookingRoom(ctx context.Context, arg CreateBookingRoomPa
 	)
 	return err
 }
+
+const getBookingByID = `-- name: GetBookingByID :one
+SELECT 
+    b.id, b.code, b.status, b.total_amount, b.currency, b.created_at,
+    g.full_name as guest_name, g.email as guest_email, g.phone as guest_phone
+FROM bookings b
+JOIN guests g ON b.guest_id = g.id
+WHERE b.id = $1 LIMIT 1
+`
+
+type GetBookingByIDRow struct {
+	ID          pgtype.UUID        `json:"id"`
+	Code        string             `json:"code"`
+	Status      pgtype.Text        `json:"status"`
+	TotalAmount pgtype.Numeric     `json:"total_amount"`
+	Currency    pgtype.Text        `json:"currency"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	GuestName   string             `json:"guest_name"`
+	GuestEmail  pgtype.Text        `json:"guest_email"`
+	GuestPhone  pgtype.Text        `json:"guest_phone"`
+}
+
+func (q *Queries) GetBookingByID(ctx context.Context, id pgtype.UUID) (GetBookingByIDRow, error) {
+	row := q.db.QueryRow(ctx, getBookingByID, id)
+	var i GetBookingByIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.Code,
+		&i.Status,
+		&i.TotalAmount,
+		&i.Currency,
+		&i.CreatedAt,
+		&i.GuestName,
+		&i.GuestEmail,
+		&i.GuestPhone,
+	)
+	return i, err
+}
+
+const getBookingRooms = `-- name: GetBookingRooms :many
+SELECT id, booking_id, room_type_id, rate_plan_id, check_in, check_out, price_per_night, assigned_room_id, guest_names FROM booking_rooms WHERE booking_id = $1
+`
+
+func (q *Queries) GetBookingRooms(ctx context.Context, bookingID pgtype.UUID) ([]BookingRoom, error) {
+	rows, err := q.db.Query(ctx, getBookingRooms, bookingID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []BookingRoom
+	for rows.Next() {
+		var i BookingRoom
+		if err := rows.Scan(
+			&i.ID,
+			&i.BookingID,
+			&i.RoomTypeID,
+			&i.RatePlanID,
+			&i.CheckIn,
+			&i.CheckOut,
+			&i.PricePerNight,
+			&i.AssignedRoomID,
+			&i.GuestNames,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listBookings = `-- name: ListBookings :many
+SELECT 
+    b.id, b.code, b.status, b.total_amount, b.currency, b.created_at,
+    g.full_name as guest_name
+FROM bookings b
+JOIN guests g ON b.guest_id = g.id
+WHERE 
+    b.hotel_id = $1
+    AND ($2::text IS NULL OR b.status = $2)
+ORDER BY b.created_at DESC
+`
+
+type ListBookingsParams struct {
+	HotelID pgtype.UUID `json:"hotel_id"`
+	Status  pgtype.Text `json:"status"`
+}
+
+type ListBookingsRow struct {
+	ID          pgtype.UUID        `json:"id"`
+	Code        string             `json:"code"`
+	Status      pgtype.Text        `json:"status"`
+	TotalAmount pgtype.Numeric     `json:"total_amount"`
+	Currency    pgtype.Text        `json:"currency"`
+	CreatedAt   pgtype.Timestamptz `json:"created_at"`
+	GuestName   string             `json:"guest_name"`
+}
+
+func (q *Queries) ListBookings(ctx context.Context, arg ListBookingsParams) ([]ListBookingsRow, error) {
+	rows, err := q.db.Query(ctx, listBookings, arg.HotelID, arg.Status)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListBookingsRow
+	for rows.Next() {
+		var i ListBookingsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Code,
+			&i.Status,
+			&i.TotalAmount,
+			&i.Currency,
+			&i.CreatedAt,
+			&i.GuestName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateBookingStatus = `-- name: UpdateBookingStatus :exec
+UPDATE bookings 
+SET status = $2, updated_at = NOW()
+WHERE id = $1
+`
+
+type UpdateBookingStatusParams struct {
+	ID     pgtype.UUID `json:"id"`
+	Status pgtype.Text `json:"status"`
+}
+
+func (q *Queries) UpdateBookingStatus(ctx context.Context, arg UpdateBookingStatusParams) error {
+	_, err := q.db.Exec(ctx, updateBookingStatus, arg.ID, arg.Status)
+	return err
+}

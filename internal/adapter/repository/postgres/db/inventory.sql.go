@@ -75,18 +75,19 @@ func (q *Queries) GetInventoryByDateRange(ctx context.Context, arg GetInventoryB
 const updateInventoryCount = `-- name: UpdateInventoryCount :one
 UPDATE inventory
 SET 
-    booked_count = booked_count + 1,
+    booked_count = booked_count + $3::int,
     version = version + 1
 WHERE 
     id = $1 
     AND version = $2
-    AND booked_count < total_inventory
+    AND (booked_count + $3::int) <= total_inventory
 RETURNING id, version, booked_count
 `
 
 type UpdateInventoryCountParams struct {
-	ID      pgtype.UUID `json:"id"`
-	Version pgtype.Int8 `json:"version"`
+	ID       pgtype.UUID `json:"id"`
+	Version  pgtype.Int8 `json:"version"`
+	Quantity int32       `json:"quantity"`
 }
 
 type UpdateInventoryCountRow struct {
@@ -95,9 +96,8 @@ type UpdateInventoryCountRow struct {
 	BookedCount pgtype.Int4 `json:"booked_count"`
 }
 
-// This query uses Optimistic Locking (version) to avoid overbooking.
 func (q *Queries) UpdateInventoryCount(ctx context.Context, arg UpdateInventoryCountParams) (UpdateInventoryCountRow, error) {
-	row := q.db.QueryRow(ctx, updateInventoryCount, arg.ID, arg.Version)
+	row := q.db.QueryRow(ctx, updateInventoryCount, arg.ID, arg.Version, arg.Quantity)
 	var i UpdateInventoryCountRow
 	err := row.Scan(&i.ID, &i.Version, &i.BookedCount)
 	return i, err

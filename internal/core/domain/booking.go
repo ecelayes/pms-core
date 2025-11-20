@@ -37,7 +37,11 @@ type Booking struct {
 	ID          string        `json:"id"`
 	Code        string        `json:"code"`
 	Status      BookingStatus `json:"status"`
-	GuestID     string        `json:"guest_id"`
+	GuestID     string        `json:"guest_id,omitempty"`
+	GuestName   string        `json:"guest_name,omitempty"`
 	TotalAmount float64       `json:"total_amount"`
+	Currency    string        `json:"currency"`
 	CreatedAt   time.Time     `json:"created_at"`
+	Guest       *GuestInfo    `json:"guest_details,omitempty"`
+	Items       []BookingItem `json:"items,omitempty"`
 }

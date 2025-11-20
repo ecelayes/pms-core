@@ -14,13 +14,12 @@ WHERE
 ORDER BY date ASC;
 
 -- name: UpdateInventoryCount :one
--- This query uses Optimistic Locking (version) to avoid overbooking.
 UPDATE inventory
 SET 
-    booked_count = booked_count + 1,
+    booked_count = booked_count + sqlc.arg(quantity)::int,
     version = version + 1
 WHERE 
     id = $1 
     AND version = $2
-    AND booked_count < total_inventory
+    AND (booked_count + sqlc.arg(quantity)::int) <= total_inventory
 RETURNING id, version, booked_count;
