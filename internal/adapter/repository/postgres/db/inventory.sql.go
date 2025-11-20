@@ -72,6 +72,27 @@ func (q *Queries) GetInventoryByDateRange(ctx context.Context, arg GetInventoryB
 	return items, nil
 }
 
+const restoreInventory = `-- name: RestoreInventory :exec
+UPDATE inventory
+SET booked_count = booked_count - 1
+WHERE 
+    room_type_id = $1
+    AND date >= $2::date 
+    AND date < $3::date
+    AND booked_count > 0
+`
+
+type RestoreInventoryParams struct {
+	RoomTypeID pgtype.UUID `json:"room_type_id"`
+	CheckIn    pgtype.Date `json:"check_in"`
+	CheckOut   pgtype.Date `json:"check_out"`
+}
+
+func (q *Queries) RestoreInventory(ctx context.Context, arg RestoreInventoryParams) error {
+	_, err := q.db.Exec(ctx, restoreInventory, arg.RoomTypeID, arg.CheckIn, arg.CheckOut)
+	return err
+}
+
 const updateInventoryCount = `-- name: UpdateInventoryCount :one
 UPDATE inventory
 SET 

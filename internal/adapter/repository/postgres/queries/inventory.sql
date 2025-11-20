@@ -23,3 +23,12 @@ WHERE
     AND version = $2
     AND (booked_count + sqlc.arg(quantity)::int) <= total_inventory
 RETURNING id, version, booked_count;
+
+-- name: RestoreInventory :exec
+UPDATE inventory
+SET booked_count = booked_count - 1
+WHERE 
+    room_type_id = $1
+    AND date >= sqlc.arg(check_in)::date 
+    AND date < sqlc.arg(check_out)::date
+    AND booked_count > 0;

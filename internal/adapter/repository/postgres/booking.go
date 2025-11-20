@@ -186,14 +186,49 @@ func (r *BookingRepo) UpdateStatus(ctx context.Context, id string, status domain
 	})
 }
 
-func generateResCode() string {
-	return fmt.Sprintf("RES-%d", time.Now().UnixNano()%100000)
+func (r *BookingRepo) CancelBookingAtomic(ctx context.Context, id string) error {
+	bookingUUID, err := uuid.Parse(id)
+	if err != nil {
+		return fmt.Errorf("Invalid uuid: %w", err)
+	}
+
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	qtx := db.New(r.pool).WithTx(tx)
+
+	rooms, err := qtx.GetBookingRooms(ctx, pgtype.UUID{Bytes: bookingUUID, Valid: true})
+	if err != nil {
+		return fmt.Errorf("Error reading rooms to cancel: %w", err)
+	}
+
+	for _, room := range rooms {
+		err := qtx.RestoreInventory(ctx, db.RestoreInventoryParams{
+			RoomTypeID: room.RoomTypeID,
+			CheckIn:    room.CheckIn,
+			CheckOut:   room.CheckOut,
+		})
+		if err != nil {
+			return fmt.Errorf("Error returning stock to inventory: %w", err)
+		}
+	}
+
+	err = qtx.UpdateBookingStatus(ctx, db.UpdateBookingStatusParams{
+		ID:     pgtype.UUID{Bytes: bookingUUID, Valid: true},
+		Status: pgtype.Text{String: "cancelled", Valid: true},
+	})
+	if err != nil {
+		return fmt.Errorf("Error updating reservation status: %w", err)
+	}
+
+	return tx.Commit(ctx)
 }
 
-func uuidFromString(s string) [16]byte {
-	var b [16]byte
-	copy(b[:], s) 
-	return b
+func generateResCode() string {
+	return fmt.Sprintf("RES-%d", time.Now().UnixNano()%100000)
 }
 
 func numericFromFloat(f float64) pgtype.Numeric {
