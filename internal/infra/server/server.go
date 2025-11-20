@@ -19,12 +19,17 @@ func New() *Server {
 	return &Server{Echo: e}
 }
 
-func (s *Server) RegisterRoutes(avHandler *httpHandler.AvailabilityHandler) {
+func (s *Server) RegisterRoutes(
+	avHandler *httpHandler.AvailabilityHandler,
+	bookHandler *httpHandler.BookingHandler,
+) {
 	v1 := s.Echo.Group("/api/v1")
 
 	v1.GET("/health", func(c echo.Context) error { return c.JSON(200, "ok") })
 	
 	v1.GET("/availability", avHandler.Get)
+
+	v1.POST("/bookings", bookHandler.Create)
 }
 
 func (s *Server) Start(port string) error {

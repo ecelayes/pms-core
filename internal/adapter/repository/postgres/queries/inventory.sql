@@ -6,7 +6,8 @@ SELECT
     date,
     total_inventory,
     booked_count,
-    price
+    price,
+    version
 FROM inventory
 WHERE 
     date >= $1 AND date <= $2

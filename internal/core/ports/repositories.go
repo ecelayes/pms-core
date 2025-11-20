@@ -8,3 +8,7 @@ import (
 type AvailabilityRepository interface {
 	GetAvailability(ctx context.Context, startDate, endDate string) ([]domain.InventoryItem, error)
 }
+
+type BookingRepository interface {
+	CreateBookingAtomic(ctx context.Context, req domain.BookingRequest) (string, error)
+}
