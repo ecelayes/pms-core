@@ -15,6 +15,7 @@ func New() *Server {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.Secure())
 	e.Use(middleware.CORS())
 	return &Server{Echo: e}
 }
@@ -26,10 +27,12 @@ func (s *Server) RegisterRoutes(
 	v1 := s.Echo.Group("/api/v1")
 
 	v1.GET("/health", func(c echo.Context) error { return c.JSON(200, "ok") })
-	
 	v1.GET("/availability", avHandler.Get)
-
 	v1.POST("/bookings", bookHandler.Create)
+	v1.POST("/bookings", bookHandler.Create)
+  v1.GET("/bookings", bookHandler.List)
+  v1.GET("/bookings/:id", bookHandler.Get)
+  v1.POST("/bookings/:id/cancel", bookHandler.Cancel)
 }
 
 func (s *Server) Start(port string) error {

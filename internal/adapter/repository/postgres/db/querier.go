@@ -14,8 +14,11 @@ type Querier interface {
 	CreateBooking(ctx context.Context, arg CreateBookingParams) (CreateBookingRow, error)
 	CreateBookingRoom(ctx context.Context, arg CreateBookingRoomParams) error
 	CreateGuest(ctx context.Context, arg CreateGuestParams) (pgtype.UUID, error)
+	GetBookingByID(ctx context.Context, id pgtype.UUID) (GetBookingByIDRow, error)
+	GetBookingRooms(ctx context.Context, bookingID pgtype.UUID) ([]BookingRoom, error)
 	GetInventoryByDateRange(ctx context.Context, arg GetInventoryByDateRangeParams) ([]GetInventoryByDateRangeRow, error)
-	// This query uses Optimistic Locking (version) to avoid overbooking.
+	ListBookings(ctx context.Context, arg ListBookingsParams) ([]ListBookingsRow, error)
+	UpdateBookingStatus(ctx context.Context, arg UpdateBookingStatusParams) error
 	UpdateInventoryCount(ctx context.Context, arg UpdateInventoryCountParams) (UpdateInventoryCountRow, error)
 }
 

@@ -45,3 +45,24 @@ func (s *BookingService) Create(ctx context.Context, req domain.BookingRequest) 
 	
 	return s.repo.CreateBookingAtomic(ctx, req)
 }
+
+func (s *BookingService) Get(ctx context.Context, id string) (*domain.Booking, error) {
+	return s.repo.GetByID(ctx, id)
+}
+
+func (s *BookingService) List(ctx context.Context, hotelID string) ([]domain.Booking, error) {
+	return s.repo.List(ctx, hotelID)
+}
+
+func (s *BookingService) Cancel(ctx context.Context, id string) error {
+	b, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	
+	if b.Status == domain.BookingStatusCancelled {
+		return nil 
+	}
+
+	return s.repo.UpdateStatus(ctx, id, domain.BookingStatusCancelled)
+}
