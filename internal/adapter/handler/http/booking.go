@@ -46,3 +46,33 @@ func (h *BookingHandler) Create(c echo.Context) error {
 		"status":       "confirmed",
 	})
 }
+
+func (h *BookingHandler) Get(c echo.Context) error {
+	id := c.Param("id")
+	booking, err := h.svc.Get(c.Request().Context(), id)
+	if err != nil {
+		return response.Error(c, http.StatusNotFound, err)
+	}
+	return response.Success(c, http.StatusOK, booking)
+}
+
+func (h *BookingHandler) List(c echo.Context) error {
+	hotelID := c.QueryParam("hotel_id")
+	if hotelID == "" {
+		return response.Error(c, http.StatusBadRequest, errors.New("hotel_id is required"))
+	}
+
+	list, err := h.svc.List(c.Request().Context(), hotelID)
+	if err != nil {
+		return response.Error(c, http.StatusInternalServerError, err)
+	}
+	return response.Success(c, http.StatusOK, list)
+}
+
+func (h *BookingHandler) Cancel(c echo.Context) error {
+	id := c.Param("id")
+	if err := h.svc.Cancel(c.Request().Context(), id); err != nil {
+		return response.Error(c, http.StatusInternalServerError, err)
+	}
+	return response.Success(c, http.StatusOK, map[string]string{"status": "cancelled"})
+}
