@@ -18,6 +18,7 @@ type Querier interface {
 	GetBookingRooms(ctx context.Context, bookingID pgtype.UUID) ([]BookingRoom, error)
 	GetInventoryByDateRange(ctx context.Context, arg GetInventoryByDateRangeParams) ([]GetInventoryByDateRangeRow, error)
 	ListBookings(ctx context.Context, arg ListBookingsParams) ([]ListBookingsRow, error)
+	RestoreInventory(ctx context.Context, arg RestoreInventoryParams) error
 	UpdateBookingStatus(ctx context.Context, arg UpdateBookingStatusParams) error
 	UpdateInventoryCount(ctx context.Context, arg UpdateInventoryCountParams) (UpdateInventoryCountRow, error)
 }

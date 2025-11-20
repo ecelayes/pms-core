@@ -14,4 +14,5 @@ type BookingRepository interface {
 	GetByID(ctx context.Context, id string) (*domain.Booking, error)
   List(ctx context.Context, hotelID string) ([]domain.Booking, error)
   UpdateStatus(ctx context.Context, id string, status domain.BookingStatus) error
+	CancelBookingAtomic(ctx context.Context, id string) error
 }
