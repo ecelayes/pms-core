@@ -6,9 +6,14 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Querier interface {
+	CreateBooking(ctx context.Context, arg CreateBookingParams) (CreateBookingRow, error)
+	CreateBookingRoom(ctx context.Context, arg CreateBookingRoomParams) error
+	CreateGuest(ctx context.Context, arg CreateGuestParams) (pgtype.UUID, error)
 	GetInventoryByDateRange(ctx context.Context, arg GetInventoryByDateRangeParams) ([]GetInventoryByDateRangeRow, error)
 	// This query uses Optimistic Locking (version) to avoid overbooking.
 	UpdateInventoryCount(ctx context.Context, arg UpdateInventoryCountParams) (UpdateInventoryCountRow, error)

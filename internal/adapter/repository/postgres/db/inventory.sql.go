@@ -19,7 +19,8 @@ SELECT
     date,
     total_inventory,
     booked_count,
-    price
+    price,
+    version
 FROM inventory
 WHERE 
     date >= $1 AND date <= $2
@@ -39,6 +40,7 @@ type GetInventoryByDateRangeRow struct {
 	TotalInventory int32          `json:"total_inventory"`
 	BookedCount    pgtype.Int4    `json:"booked_count"`
 	Price          pgtype.Numeric `json:"price"`
+	Version        pgtype.Int8    `json:"version"`
 }
 
 func (q *Queries) GetInventoryByDateRange(ctx context.Context, arg GetInventoryByDateRangeParams) ([]GetInventoryByDateRangeRow, error) {
@@ -58,6 +60,7 @@ func (q *Queries) GetInventoryByDateRange(ctx context.Context, arg GetInventoryB
 			&i.TotalInventory,
 			&i.BookedCount,
 			&i.Price,
+			&i.Version,
 		); err != nil {
 			return nil, err
 		}
