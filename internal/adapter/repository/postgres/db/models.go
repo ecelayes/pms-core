@@ -83,6 +83,7 @@ type Hotel struct {
 	Settings  []byte             `json:"settings"`
 	CreatedAt pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+	OwnerID   pgtype.UUID        `json:"owner_id"`
 }
 
 type Inventory struct {

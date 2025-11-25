@@ -5,6 +5,16 @@ import (
 	"github.com/ecelayes/pms-core/internal/core/domain"
 )
 
+type AuthRepository interface {
+	RegisterUser(ctx context.Context, email, passwordHash string) (string, error)
+	GetUserByEmail(ctx context.Context, email string) (*domain.User, error)
+}
+
+type HotelRepository interface {
+	CreateHotel(ctx context.Context, ownerID string, req domain.CreateHotelRequest) (string, error)
+	ListByOwner(ctx context.Context, ownerID string) ([]domain.Hotel, error)
+}
+
 type AvailabilityRepository interface {
 	GetAvailability(ctx context.Context, startDate, endDate string) ([]domain.InventoryItem, error)
 }
