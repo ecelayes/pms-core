@@ -12,4 +12,7 @@ var (
 	ErrInvalidDateFormat = errors.New("The date format is invalid. Please use YYYY-MM-DD.")
 	ErrInvalidDateRange  = errors.New("The check-out date must be after the check-in date.")
 	ErrPastDate          = errors.New("Cannot be reserved in the past")
+
+	ErrEmailAlreadyExists = errors.New("The email address is already registered.")
+	ErrInvalidCredentials = errors.New("Invalid credentials")
 )
